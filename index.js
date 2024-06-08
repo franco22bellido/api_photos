@@ -33,11 +33,16 @@ app.post('/api/upload', async (req, res, next) => {
             .resize({ width: 1080, height: 1350, fit: 'cover', position: 'center' })
             .toBuffer()
         
-        await fs.writeFile(`${file.filepath}.jpg`, imagenCompressed)
-
-        const results = await cloudinary.uploader.upload(`${file.filepath}.jpg`)
-        console.log(results)
-        res.json({ ok: true, message: "photo uploaded" })
+        const response = await new Promise((resolve, reject)=> {
+            cloudinary.uploader.upload_stream({}, (err, result)=> {
+                if(err) {
+                    return reject(err)
+                }
+                return resolve(result)
+            }).end(imagenCompressed)
+        })
+        
+        res.json({ ok: true, message: "photo uploaded", url: response.secure_url })
     } catch (error) {
         console.log(error)
         return res.json(error)
