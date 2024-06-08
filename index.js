@@ -20,26 +20,33 @@ const upload = multer()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.post('/api/upload',upload.single('photo'), async (req, res) => {
+const allowedExtensions = ['jpg', 'jpeg', 'png', 'bmp']
+
+app.post('/api/upload', upload.single('photo'), async (req, res) => {
+    const maxSize = 1024 * 1024 * 15;
+    if(req.file.size>maxSize) return res.status(406).json({message: "the max size is 15 megabytes"})
+        
+        const fileExtension = req.file.mimetype.split('/')[1]
+    if (!allowedExtensions.includes(fileExtension)) return res.status(415).json({ ok: false, message: 'unsupported format' })
 
     try {
         const imagenCompressed = await sharp(req.file.buffer)
             .jpeg({ quality: 30 })
             .resize({ width: 1080, height: 1350, fit: 'cover', position: 'center' })
             .toBuffer()
-        const response = await new Promise((resolve, reject)=> {
-            cloudinary.uploader.upload_stream({}, (err, result)=> {
-                if(err) {
+
+        const response = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream({}, (err, result) => {
+                if (err) {
                     return reject(err)
                 }
                 return resolve(result)
             }).end(imagenCompressed)
         })
 
-        res.json({ ok: true, message: "photo uploaded", url: response.secure_url})
+        res.json({ ok: true, message: "photo uploaded", url: response.secure_url })
     } catch (error) {
-        console.log(error)
-        return res.json(error)
+        return res.send(error)
     }
 });
 
