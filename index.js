@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import { config } from 'dotenv'
 import { v2 as cloudinary } from 'cloudinary'
 import multer from 'multer'
+import cors from 'cors'
 
 config()
 
@@ -17,6 +18,7 @@ cloudinary.config(
 const app = express()
 const upload = multer()
 
+app.use(cors({origin: [process.env.frontend_host]}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
@@ -50,6 +52,6 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log("server on port 3000")
+app.listen(process.env.PORT, () => {
+    console.log(`SERVER ON PORT ${process.env.PORT}`)
 })
