@@ -2,11 +2,22 @@ import express from 'express';
 import * as formidable from 'formidable';
 import sharp from 'sharp';
 import fs from 'fs/promises'
+import { config } from 'dotenv'
+import { v2 as cloudinary } from 'cloudinary'
+config()
+
+cloudinary.config(
+    {
+        cloud_name: process.env.cloudinary_cloud_name,
+        api_key: process.env.cloudinary_api_key,
+        api_secret: process.env.cloudinary_api_secret
+    }
+)
 
 const app = express()
 
 app.use(express.json())
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }))
 
 app.post('/api/upload', async (req, res, next) => {
     const form = new formidable.IncomingForm()
@@ -16,18 +27,23 @@ app.post('/api/upload', async (req, res, next) => {
         const file = files.myfile[0]
         console.log(file.filepath)
         sharp.cache(false)
-        
+
         const imagenCompressed = await sharp(file.filepath)
-        .jpeg({quality : 30})
-        .resize({width: 1080, height: 1350, fit: 'cover', position: 'center'})
-        .toBuffer()
-        fs.writeFile(file.filepath, imagenCompressed)
-        res.json({ok: true, message: "photo uploaded"})
+            .jpeg({ quality: 30 })
+            .resize({ width: 1080, height: 1350, fit: 'cover', position: 'center' })
+            .toBuffer()
+        
+        await fs.writeFile(`${file.filepath}.jpg`, imagenCompressed)
+
+        const results = await cloudinary.uploader.upload(`${file.filepath}.jpg`)
+        console.log(results)
+        res.json({ ok: true, message: "photo uploaded" })
     } catch (error) {
         console.log(error)
+        return res.json(error)
     }
-  });
+});
 
-app.listen(3000, ()=> {
+app.listen(3000, () => {
     console.log("server on port 3000")
 })
