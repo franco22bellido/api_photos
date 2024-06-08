@@ -7,18 +7,6 @@ const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.post('/api/photo', async (req, res)=> {
-    const data = req.file;
-    console.log(data)
-    try {
-        const imagenCompressed = await sharp(imagePath)
-        .jpeg({quality : 30})
-        .resize({width: 1080, height: 1350, fit: 'cover', position: 'center'})
-        .toFile();
-    } catch (error) {
-        
-    }
-})
 
 app.post('/api/upload', async (req, res, next) => {
     const form = new formidable.IncomingForm()
