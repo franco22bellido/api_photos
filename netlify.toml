@@ -1,6 +1,9 @@
+[functions]
+  included_files = ["node_modules/@sharpen/**"]
+
+
 [build]
     functions = "functions"
-    external_node_modules = ["express", "cors", "cloudinary", "dotenv", "multer", "sharp"]
     node_bundler = "esbuild"
 
 [[redirects]]
