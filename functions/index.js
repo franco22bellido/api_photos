@@ -2,8 +2,10 @@ import express from 'express';
 import sharp from 'sharp';
 import { config } from 'dotenv'
 import { v2 as cloudinary } from 'cloudinary'
+import serverless from 'serverless-http'
 import multer from 'multer'
 import cors from 'cors'
+
 
 config()
 
@@ -52,6 +54,4 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
     }
 });
 
-app.listen(process.env.PORT, () => {
-    console.log(`SERVER ON PORT ${process.env.PORT}`)
-})
+export const handler = serverless(app)
