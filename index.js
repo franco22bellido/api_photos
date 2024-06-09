@@ -18,6 +18,7 @@ cloudinary.config(
 const app = express()
 const upload = multer()
 
+
 app.use(cors({origin: [process.env.frontend_host]}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -29,12 +30,12 @@ app.get('/', (req, res)=> {
 
 app.post('/api/upload', upload.single('photo'), async (req, res) => {
     const maxSize = 1024 * 1024 * 15;
+    try {
     if(req.file.size>maxSize) return res.status(406).json({message: "the max size is 15 megabytes"})
         
         const fileExtension = req.file.mimetype.split('/')[1]
     if (!allowedExtensions.includes(fileExtension)) return res.status(415).json({ ok: false, message: 'unsupported format' })
 
-    try {
         const imagenCompressed = await sharp(req.file.buffer)
             .jpeg({ quality: 30 })
             .resize({ width: 1080, height: 1350, fit: 'cover', position: 'center' })
@@ -51,7 +52,7 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
 
         res.json({ ok: true, message: "photo uploaded", url: response.secure_url })
     } catch (error) {
-        return res.send(error)
+        return res.status(400).send(error)
     }
 });
 
