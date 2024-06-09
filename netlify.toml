@@ -1,5 +1,5 @@
 [functions]
-  included_files = ["node_modules/@sharpen/**"]
+  included_files = ["node_modules/sharp/**"]
 
 
 [build]
