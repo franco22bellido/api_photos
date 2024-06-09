@@ -13,7 +13,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@img/sharp-linux-arm": "^0.33.4",
     "@img/sharp-linux-arm64": "^0.33.4",
     "cloudinary": "^2.2.0",
     "cors": "^2.8.5",
