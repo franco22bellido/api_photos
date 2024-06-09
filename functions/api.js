@@ -2,9 +2,9 @@ import express from 'express';
 import sharp from 'sharp';
 import { config } from 'dotenv'
 import { v2 as cloudinary } from 'cloudinary'
-import serverless from 'serverless-http'
 import multer from 'multer'
 import cors from 'cors'
+import ServerlessHttp from 'serverless-http';
 
 
 config()
@@ -20,17 +20,23 @@ cloudinary.config(
 const app = express()
 const upload = multer()
 
-app.use(cors({origin: [process.env.frontend_host]}))
+app.use(cors({ origin: [process.env.frontend_host] }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 const allowedExtensions = ['jpg', 'jpeg', 'png', 'bmp']
 
+app.get('/api', (req, res) => {
+    return res.json({
+        messages: "hello world!"
+    })
+})
+
 app.post('/api/upload', upload.single('photo'), async (req, res) => {
     const maxSize = 1024 * 1024 * 15;
-    if(req.file.size>maxSize) return res.status(406).json({message: "the max size is 15 megabytes"})
-        
-        const fileExtension = req.file.mimetype.split('/')[1]
+    if (req.file.size > maxSize) return res.status(406).json({ message: "the max size is 15 megabytes" })
+
+    const fileExtension = req.file.mimetype.split('/')[1]
     if (!allowedExtensions.includes(fileExtension)) return res.status(415).json({ ok: false, message: 'unsupported format' })
 
     try {
@@ -54,4 +60,9 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
     }
 });
 
-export const handler = serverless(app)
+const handler = ServerlessHttp(app);
+
+module.exports.handler = async (event, context) => {
+    const result = await handler(event, context)
+    return result
+}

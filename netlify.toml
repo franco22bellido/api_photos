@@ -1,5 +1,10 @@
 [build]
-  functions = "functions"
+    functions = "functions"
+    external_node_modules = ["express", "cors", "cloudinary", "dotenv", "multer", "sharp"]
+    node_bundler = "esbuild"
 
-[dev]
-  publish = "dist"
+[[redirects]]
+  force = true
+  from = "/api/*"
+  status = 200
+  to = "/.netlify/functions/api/:splat"
