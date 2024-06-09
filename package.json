@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "npm install --cpu=x64 --os=linux --libc=glibc sharp; netlify deploy --prod",
+    "build": "netlify deploy --prod",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
