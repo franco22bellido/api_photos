@@ -23,6 +23,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 const allowedExtensions = ['jpg', 'jpeg', 'png', 'bmp']
+app.get('/', (req, res)=> {
+    res.json({message: "hello world"})
+})
 
 app.post('/api/upload', upload.single('photo'), async (req, res) => {
     const maxSize = 1024 * 1024 * 15;
