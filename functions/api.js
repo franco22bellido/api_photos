@@ -1,10 +1,10 @@
 import express from 'express';
 import { config } from 'dotenv'
-import sharp from 'sharp';
 import { v2 as cloudinary } from 'cloudinary'
 import multer from 'multer'
 import cors from 'cors'
 import ServerlessHttp from 'serverless-http';
+import Jimp from 'jimp'
 
 
 config()
@@ -41,11 +41,23 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
     if (!allowedExtensions.includes(fileExtension)) return res.status(415).json({ ok: false, message: 'unsupported format' })
     pasos = 'paso uno terminado'
     try {
-        
-        const imagenCompressed = await sharp(req.file.buffer)
-            .jpeg({ quality: 30 })
-            .resize({ width: 1080, height: 1350, fit: 'cover', position: 'center' })
-            .toBuffer()
+
+        // const imagenCompressed = await sharp(req.file.buffer)
+        //     .jpeg({ quality: 30 })
+        //     .resize({ width: 1080, height: 1350, fit: 'cover', position: 'center' })
+        //     .toBuffer()
+
+        const imagen = await Jimp.read(req.file.buffer);
+
+        // Redimensionar la imagen
+        imagen.cover(1080, 1350, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
+
+        // Establecer la calidad de JPEG
+        imagen.quality(30);
+
+        // Convertir la imagen a buffer
+        const bufferProcesado = await imagen.getBufferAsync(Jimp.MIME_JPEG);
+
         pasos = 'paso 2 terminado'
         const response = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream({}, (err, result) => {
@@ -53,13 +65,13 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
                     return reject(err)
                 }
                 return resolve(result)
-            }).end(imagenCompressed)
+            }).end(bufferProcesado)
         })
         pasos = 'paso 3 terminado'
         res.json({ ok: true, message: "photo uploaded", url: response.secure_url })
     } catch (error) {
         const newError = error.message;
-        return res.send({newError ,error, pasos})
+        return res.send({ newError, error, pasos })
     }
 });
 
