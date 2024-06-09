@@ -1,6 +1,6 @@
 import express from 'express';
 import { config } from 'dotenv'
-import sharp from 'sharp';
+const sharp = require('@img/sharp-win32-x64/sharp.node')
 import { v2 as cloudinary } from 'cloudinary'
 import multer from 'multer'
 import cors from 'cors'
