@@ -20,8 +20,8 @@ const upload = multer()
 
 
 app.use(cors({origin: [process.env.frontend_host]}))
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json({limit: '15mb'}))
+app.use(express.urlencoded({ extended: true, limit: '15mb'}))
 
 const allowedExtensions = ['jpg', 'jpeg', 'png', 'bmp']
 app.get('/', (req, res)=> {
