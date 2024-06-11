@@ -1,17 +1,16 @@
 import express from 'express';
 import sharp from 'sharp';
-import { config } from 'dotenv'
 import { v2 as cloudinary } from 'cloudinary'
 import multer from 'multer'
 import cors from 'cors'
+import { keys } from './entorn_variables.js';
 
-config()
 
 cloudinary.config(
     {
-        cloud_name: process.env.cloudinary_cloud_name,
-        api_key: process.env.cloudinary_api_key,
-        api_secret: process.env.cloudinary_api_secret
+        cloud_name: keys.CLOUDINARY_CLOUD_NAME,
+        api_key: keys.CLOUDINARY_API_KEY,
+        api_secret: keys.CLOUDINARY_API_SECRET
     }
 )
 
@@ -19,7 +18,7 @@ const app = express()
 const upload = multer()
 
 
-app.use(cors({origin: [process.env.frontend_host]}))
+app.use(cors({origin: [keys.FRONT_END_HOST]}))
 app.use(express.json({limit: '15mb'}))
 app.use(express.urlencoded({ extended: true, limit: '15mb'}))
 
@@ -56,6 +55,6 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
     }
 });
 
-app.listen(process.env.PORT, () => {
-    console.log(`SERVER ON PORT ${process.env.PORT}`)
+app.listen(keys.PORT, () => {
+    console.log(`SERVER ON PORT ${keys.PORT}`)
 })
