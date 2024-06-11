@@ -27,10 +27,21 @@ app.get('/', (req, res)=> {
     res.json({message: "hello world"})
 })
 
-app.post('/api/upload', upload.single('photo'), async (req, res) => {
+app.delete('/api/photo/public_id', async (req, res)=>{
+    try {
+        const { public_id } = req.params
+        const response = await cloudinary.uploader.destroy(public_id)
+        return res.status(204)
+    } catch (error) {
+        return res.status(404).json(error)
+    }
+
+})
+
+app.post('/api/photo', upload.single('photo'), async (req, res) => {
     const maxSize = 1024 * 1024 * 15;
     try {
-    if(req.file.size>maxSize) return res.status(406).json({message: "the max size is 15 megabytes"})
+    if(req.file.size>maxSize) return res.status(413).json({message: "the max size is 15 megabytes"})
         
         const fileExtension = req.file.mimetype.split('/')[1]
     if (!allowedExtensions.includes(fileExtension)) return res.status(415).json({ ok: false, message: 'unsupported format' })
