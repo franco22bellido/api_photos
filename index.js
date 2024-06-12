@@ -46,22 +46,23 @@ app.post('/api/photo', upload.single('photo'), async (req, res) => {
         const fileExtension = req.file.mimetype.split('/')[1]
     if (!allowedExtensions.includes(fileExtension)) return res.status(415).json({ ok: false, message: 'unsupported format' })
 
-        const {width, height} = await sharp(req.file.buffer).metadata()
+        const {width, height} = await sharp(req.file.buffer).metadata();
 
-        let newWidth, newHeight;
+let newWidth, newHeight;
 
-        if(width > height{
-            newWidth = 1080;
-            newHeight = Math.round((height/width) * newWidth)} 
-        else{
-            newHeight = 1350;
-            newWidth = Math.round((width/height)*newHeight)        }
+if (width > height) {
+    newWidth = 1080;
+    newHeight = Math.round((height / width) * newWidth);
+} else {
+    newHeight = 1350;
+    newWidth = Math.round((width / height) * newHeight);
+}
+
+const imagenCompressed = await sharp(req.file.buffer)
+    .jpeg({ quality: 30 })
+    .resize({ width: newWidth, height: newHeight, fit: 'cover', position: 'center' })
+    .toBuffer();
         
-        const imagenCompressed = await sharp(req.file.buffer)
-            .jpeg({ quality: 30 })
-            .resize({ width: newWidth, height: newHeight, fit: 'cover', position: 'center' })
-            .toBuffer()
-
         const response = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream({}, (err, result) => {
                 if (err) {
