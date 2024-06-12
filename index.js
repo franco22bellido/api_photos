@@ -48,14 +48,14 @@ app.post('/api/photo', upload.single('photo'), async (req, res) => {
 
         const {width, height} = await sharp(req.file.buffer).metadata()
 
-        let newWidth, newHeigth;
+        let newWidth, newHeight;
 
-        if(width > height){
+        if(width > height{
             newWidth = 1080;
-            newHeigth = Math.round((height/width) * newWidth)}
+            newHeight = Math.round((height/width) * newWidth)} 
         else{
-            newHeigth = 1350;
-            newWidth = Math.round((width/height)*newHeigth)        }
+            newHeight = 1350;
+            newWidth = Math.round((width/height)*newHeight)        }
         
         const imagenCompressed = await sharp(req.file.buffer)
             .jpeg({ quality: 30 })
