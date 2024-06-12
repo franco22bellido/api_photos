@@ -46,9 +46,20 @@ app.post('/api/photo', upload.single('photo'), async (req, res) => {
         const fileExtension = req.file.mimetype.split('/')[1]
     if (!allowedExtensions.includes(fileExtension)) return res.status(415).json({ ok: false, message: 'unsupported format' })
 
+        const {width, height} = await sharp(req.file.buffer).metadata()
+
+        let newWidth, newHeigth;
+
+        if(width > height){
+            newWidth = 1080;
+            newHeigth = Math.round((height/width) * newWidth)}
+        else{
+            newHeigth = 1350;
+            newWidth = Math.round((width/height)*newHeigth)        }
+        
         const imagenCompressed = await sharp(req.file.buffer)
             .jpeg({ quality: 30 })
-            .resize({ width: 1080, height: 1350, fit: 'cover', position: 'center' })
+            .resize({ width: newWidth, height: newHeight, fit: 'cover', position: 'center' })
             .toBuffer()
 
         const response = await new Promise((resolve, reject) => {
