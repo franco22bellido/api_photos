@@ -27,13 +27,21 @@ app.get('/', (req, res) => {
     res.json({ message: "hello world" })
 })
 
-app.delete('/api/photo/public_id', async (req, res) => {
+app.delete('/api/photo/:public_id', async (req, res) => {
     try {
         const { public_id } = req.params
-        const response = await cloudinary.uploader.destroy(public_id)
-        return res.status(204)
+        const result = await new Promise((resolve, reject)=> {
+            cloudinary.uploader.destroy(public_id, {}, (err, response)=> {
+                if(err) {
+                    return reject(err)
+                }
+                return resolve(response)
+            })
+        })
+
+        return res.status(204).json(result)
     } catch (error) {
-        return res.status(404).json(error)
+        return res.status(500).json(error)
     }
 
 })
@@ -43,19 +51,24 @@ app.post('/api/photo', upload.single('photo'), async (req, res) => {
     try {
         if (req.file.size > maxSize) return res.status(413).json({ message: "the max size is 15 megabytes" })
 
-        //divir la resolucion de la imagen
-        const fileExtension = req.file.mimetype.split('/')[1]
-        if (!allowedExtensions.includes(fileExtension)) return res.status(415).json({ ok: false, message: `unsupported format: ${fileExtension}` })
 
-        const { width, height } = await sharp(req.file.buffer).metadata()
-        let newHeight, newWidth;
+        const { width, height } = await sharp(req.file.buffer).metadata();
 
-        newHeight = 1350;
-        newWidth = Math.round((width / height) * newHeight);
+
+        let newWidth, newHeight;
+
+        if (width > height) {
+            newWidth = 1080;
+            newHeight = Math.round((height / width) * newWidth);
+        } else {
+            newHeight = 1350;
+            newWidth = Math.round((width / height) * newHeight);
+        }
+
         const imagenCompressed = await sharp(req.file.buffer)
             .jpeg({ quality: 30 })
             .resize({ width: newWidth, height: newHeight, fit: 'cover', position: 'center' })
-            .toBuffer()
+            .toBuffer();
 
         const response = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream({}, (err, result) => {
